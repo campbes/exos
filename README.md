@@ -32,3 +32,11 @@ This example registers a behaviour such that whenever an element with className 
 it will fire myFunction.
 
 Exos.enable([{'.hello': {'click' : myFunction}}]);
+
+Every handler function gets passed 2 arguments - the original event object and the element that was
+responsible for firing it:
+
+function myFunction(e,obj) {
+   alert("The event type was: "+e.type);
+   alert("The object that fired it was: "+obj.id);
+}
