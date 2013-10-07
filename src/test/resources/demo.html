@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Exos demo</title>
+</head>
+<body>
+
+    <button class="hello">I'm a button!</button>
+
+    <script type="text/javascript" src="exos.min.js"></script>
+
+
+    <script type="text/javascript">
+
+        function hello(e,me) {
+            alert("My innerHTML is: "+me.innerHTML);
+        }
+
+        var cfg = [{'.hello': {'click' : hello}}];
+
+        Exos.enable(cfg);
+
+    </script>
+
+</body>
+</html>

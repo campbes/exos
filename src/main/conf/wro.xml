@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<groups xmlns="http://www.isdc.ro/wro">
+    <group name='exos'>
+        <js>/resources/mootools-slick-1.4.5.js</js>
+        <js>/js/exos.js</js>
+        <js>/js/interpreter.js</js>
+    </group>
+    <group name='exos.min'>
+        <group-ref>exos</group-ref>
+    </group>
+</groups>
