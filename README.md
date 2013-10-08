@@ -50,7 +50,8 @@ You can build with Maven or Grunt.
 
 Maven - just mvn clean package
 
-Grunt - you'll need to have both node.js and grunt installed first, then:
+Grunt - you'll need to have both node.js and grunt installed first, as well as the grunt 
+install-dependencies plugin. To build, run:
 
     grunt install-dependencies
     
