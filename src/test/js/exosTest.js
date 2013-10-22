@@ -651,3 +651,47 @@ behaviourTest.prototype.testComplexQualifier = function() {
     TEST.event(document.getElementById("paraThree"),"onclick");
     assertEquals("tested",behaviourTest.output);
 };
+
+behaviourTest.prototype.testTagQualifier = function() {
+
+    /*:DOC += <div id="div" class="one"></div><p class="one" id="para"></p>*/
+
+    var cfg = [{'div.one': {'click' : function() {
+        behaviourTest.output = "tested";
+    }}}];
+
+    Exos.disable();
+    Exos.enable(cfg);
+    behaviourTest.output = "";
+    TEST.event(document.getElementById("div"),"onclick");
+    assertEquals("tested",behaviourTest.output);
+    TEST.event(document.getElementById("para"),"onclick");
+    assertEquals("tested",behaviourTest.output);
+};
+
+behaviourTest.prototype.testRelationalEvents = function() {
+    /*:DOC += <div id="parent"><div id="child"></div></div> */
+
+    var cfg = [
+        {'#parent': {'mouseenter' : function() {
+            behaviourTest.output += "parentIn";
+        }}},
+        {'#parent': {'mouseleave' : function() {
+            behaviourTest.output += "parentOut";
+        }}}
+    ];
+
+    Exos.disable();
+    Exos.enable(cfg);
+    behaviourTest.output = "";
+
+    // hard to simulate moueover from one element to another, think relatedTarget
+    // doesn't get properly set
+    TEST.event(document.getElementById("parent"),"onmouseover");
+    //TEST.event(document.getElementById("child"),"onmouseover");
+    //TEST.event(document.getElementById("child"),"onmouseout");
+    TEST.event(document.getElementById("parent"),"onmouseout");
+
+    assertEquals("parentInparentOut",behaviourTest.output);
+
+};

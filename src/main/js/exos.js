@@ -7,7 +7,7 @@ var Exos = (function () {
     "use strict";
 
     var enabled = false,
-        eventTypes = ["click", "mousedown", "mouseup", "mouseover", "mouseout", "keypress", "keydown", "keyup"],
+        eventTypes = ["click", "mousedown", "mouseup", "mouseover", "mouseout", "mouseenter", "mouseleave", "keypress", "keydown", "keyup"],
         explicitEvents = ["focus", "blur", "change", "submit"],
         eventTypesLength = eventTypes.length,
         behaviours = null,
@@ -193,6 +193,7 @@ var Exos = (function () {
         if ((target.tagName === "A" && prevDef !== false) || prevDef) {
             preventDefault(e);
         }
+
         if (typeof func === "function") {
             func.apply(target, [e, target]);
         }
@@ -210,7 +211,8 @@ var Exos = (function () {
             classes = "",
             classes_length = 0,
             i = -1,
-            parent = target.parentNode;
+            parent = target.parentNode,
+            related = e.relatedTarget;
 
         function runBehaviour() {
             if (!behaviour) {
@@ -221,6 +223,20 @@ var Exos = (function () {
             }
             if(behaviour.className && behaviour.className !== target.className) {
                 return false;
+            }
+            if(behaviour.tagName && behaviour.tagName !== target.tagName) {
+                return false;
+            }
+
+            // when moving from node to child node, want to ensure mouseover/out
+            // events are not fired
+            if(behaviour.rel) {
+                while(related !== null){
+                    if(related === target){
+                        return false;
+                    }
+                    related = related.parentNode;
+                }
             }
 
             run(e, target, behaviour);
@@ -405,11 +421,49 @@ var Exos = (function () {
         return bhvrs;
     }
 
+    function tweakEventSupport(bhvrs) {
+
+        var i, j, bhvrType, bhvr;
+
+        if(!document.body.addEventListener) {
+            return bhvrs;
+        }
+
+        function modify(bhvr,type,replaceType) {
+            if(!bhvr[type]) {
+                return;
+            }
+            bhvr[type].rel = true;
+            bhvr[replaceType] = bhvr[replaceType] || {};
+            bhvr[replaceType] = objects.merge(bhvr[replaceType],bhvr[type]);
+            delete bhvr[type];
+        }
+
+        for( i in bhvrs) {
+            if(bhvrs.hasOwnProperty(i)) {
+                bhvrType = bhvrs[i];
+                for( j in bhvrType) {
+                    if(bhvrType.hasOwnProperty(j)) {
+                        bhvr = bhvrType[j];
+                        modify(bhvr,"mouseenter","mouseover");
+                        modify(bhvr,"mouseleave","mouseout");
+                    }
+                }
+            }
+        }
+
+        return bhvrs;
+    }
+
     function enable(bhvrs) {
 
         if (objects.isArray(bhvrs)) {
             bhvrs = interpret(bhvrs);
         }
+
+        // here's where to do the tweak for mouseenter/leave - change to mouseover/out
+        // and set the "related" flag
+        bhvrs = tweakEventSupport(bhvrs);
 
         if (enabled && bhvrs) {
             add(bhvrs);
