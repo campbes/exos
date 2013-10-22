@@ -227,6 +227,14 @@ var Exos = (function () {
             if(behaviour.tagName && behaviour.tagName !== target.tagName) {
                 return false;
             }
+            if(behaviour.attribute) {
+                if(!target.hasAttribute(behaviour.attribute.key)) {
+                    return false;
+                }
+                if(behaviour.attribute.value && behaviour.attribute.value !== target.getAttribute(behaviour.attribute.key)) {
+                    return false;
+                }
+            }
 
             // when moving from node to child node, want to ensure mouseover/out
             // events are not fired
@@ -406,6 +414,9 @@ var Exos = (function () {
                                 }
                                 if(primarySel !== "tagName" && selObj.tagName) {
                                     bhvrsItem[evtType].tagName = selObj.tagName;
+                                }
+                                if(selObj.attribute) {
+                                    bhvrsItem[evtType].attribute = selObj.attribute;
                                 }
                                 if(selObj.parent) {
                                     bhvrsItem[evtType].parent = selObj.parent;

@@ -669,6 +669,38 @@ behaviourTest.prototype.testTagQualifier = function() {
     assertEquals("tested",behaviourTest.output);
 };
 
+behaviourTest.prototype.testAttributeName = function() {
+
+    /*:DOC += <div id="div" data-type="test"></div><div id="div2"></div>*/
+
+    var cfg = [{'div[data-type]': {'click' : function() {
+        behaviourTest.output += "tested";
+    }}}];
+
+    Exos.disable();
+    Exos.enable(cfg);
+    behaviourTest.output = "";
+    TEST.event(document.getElementById("div"),"onclick");
+    TEST.event(document.getElementById("div2"),"onclick");
+    assertEquals("tested",behaviourTest.output);
+};
+
+behaviourTest.prototype.testAttributeValue = function() {
+
+    /*:DOC += <div id="div" data-type="right"></div><div id="div2" data-type="wrong"></div>*/
+
+    var cfg = [{'div[data-type="right"]': {'click' : function() {
+        behaviourTest.output = "tested";
+    }}}];
+
+    Exos.disable();
+    Exos.enable(cfg);
+    behaviourTest.output += "";
+    TEST.event(document.getElementById("div"),"onclick");
+    TEST.event(document.getElementById("div2"),"onclick");
+    assertEquals("tested",behaviourTest.output);
+};
+
 behaviourTest.prototype.testRelationalEvents = function() {
     /*:DOC += <div id="parent"><div id="child"></div></div> */
 
