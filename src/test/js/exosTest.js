@@ -48,7 +48,7 @@ behaviourTest.prototype.testEnablewithBhvrs = function() {
             "test" : {
                 click : {
                     fn : function() {
-                        behaviourTest.output = "test>clicked";
+                        behaviourTest.output += "test>clicked";
                     }
                 }
             },
@@ -122,7 +122,7 @@ behaviourTest.bhvrs = {
         "chaintest" : {
             click : {
                 fn : function() {
-                    behaviourTest.output = "chaintestid";
+                    behaviourTest.output += "chaintestid";
                 }
             }
         }
@@ -209,7 +209,7 @@ behaviourTest.prototype.testBreakChainMultiClass = function() {
             "secondclass" : {
                 click : {
                     fn : function() {
-                        behaviourTest.output = " secondclass";
+                        behaviourTest.output += " secondclass";
                     }
                 }
             }
@@ -236,7 +236,7 @@ behaviourTest.prototype.testNoBubble = function() {
             "child" : {
                 click : {
                     fn : function() {
-                        behaviourTest.output = "child";
+                        behaviourTest.output += "child";
                     }
                 }
             }
@@ -263,7 +263,7 @@ behaviourTest.prototype.testBubble = function() {
             "child" : {
                 click : {
                     fn : function() {
-                        behaviourTest.output = "child";
+                        behaviourTest.output += "child";
                     },
                     bb : true
                 }
@@ -291,7 +291,7 @@ behaviourTest.prototype.testMultiBubble = function() {
             "child" : {
                 click : {
                     fn : function() {
-                        behaviourTest.output = "child";
+                        behaviourTest.output += "child";
                     },
                     bb : true
                 }
@@ -357,7 +357,7 @@ behaviourTest.prototype.testPreventDefault = function() {
             "testlink" : {
                 click : {
                     fn : function() {
-                        behaviourTest.output = "testlink";
+                        behaviourTest.output += "testlink";
                     }
                 }
             }
@@ -379,7 +379,7 @@ behaviourTest.prototype.testAssignables = function() {
             "testselect" : {
                 change : {
                     fn : function() {
-                        behaviourTest.output = this.options[this.selectedIndex].value;
+                        behaviourTest.output += this.options[this.selectedIndex].value;
                     }
                 }
             }
@@ -399,7 +399,7 @@ behaviourTest.prototype.testRemoveAssignables = function() {
             "testselect" : {
                 change : {
                     fn : function() {
-                        behaviourTest.output = this.options[this.selectedIndex].value;
+                        behaviourTest.output += this.options[this.selectedIndex].value;
                     }
                 }
             }
@@ -427,7 +427,7 @@ behaviourTest.prototype.testAdd = function() {
             "test" : {
                 click : {
                     fn : function() {
-                        behaviourTest.output = "id";
+                        behaviourTest.output += "id";
                     }
                 }
             }
@@ -586,7 +586,7 @@ behaviourTest.prototype.testQualifiers = function() {
             "DIV" : {
                 click : {
                     fn : function() {
-                        behaviourTest.output = "tested";
+                        behaviourTest.output += "tested";
                     },
                     className : 'testClass'
                 }
@@ -619,7 +619,7 @@ behaviourTest.prototype.testQualifiers = function() {
 behaviourTest.prototype.testMultipleSelectors = function() {
     /*:DOC += <div id="testDiv"></div><h1 id="testH1">stuff</h1>*/
     var cfg = [{'DIV, h1': {'click' : function() {
-        behaviourTest.output = "tested";
+        behaviourTest.output += "tested";
     }}}];
     Exos.disable();
     Exos.enable(cfg);
@@ -638,7 +638,7 @@ behaviourTest.prototype.testComplexQualifier = function() {
     /*:DOC += <div class="one"><ul><li><p id="paraOne"></p></li></ul></div><div class="two"><ul><li><p id="paraTwo"></p></li></ul></div><div class="one"><li><p id="paraThree"></p></li></div>*/
 
     var cfg = [{'div.one > ul p': {'click' : function() {
-        behaviourTest.output = "tested";
+        behaviourTest.output += "tested";
     }}}];
 
     Exos.disable();
@@ -690,12 +690,12 @@ behaviourTest.prototype.testAttributeValue = function() {
     /*:DOC += <div id="div" data-type="right"></div><div id="div2" data-type="wrong"></div>*/
 
     var cfg = [{'div[data-type="right"]': {'click' : function() {
-        behaviourTest.output = "tested";
+        behaviourTest.output += "tested";
     }}}];
 
     Exos.disable();
     Exos.enable(cfg);
-    behaviourTest.output += "";
+    behaviourTest.output = "";
     TEST.event(document.getElementById("div"),"onclick");
     TEST.event(document.getElementById("div2"),"onclick");
     assertEquals("tested",behaviourTest.output);
@@ -703,6 +703,8 @@ behaviourTest.prototype.testAttributeValue = function() {
 
 behaviourTest.prototype.testRelationalEvents = function() {
     /*:DOC += <div id="parent"><div id="child"></div></div> */
+
+    behaviourTest.output = "";
 
     var cfg = [
         {'#parent': {'mouseenter' : function() {
@@ -715,15 +717,14 @@ behaviourTest.prototype.testRelationalEvents = function() {
 
     Exos.disable();
     Exos.enable(cfg);
-    behaviourTest.output = "";
+
 
     // hard to simulate moueover from one element to another, think relatedTarget
     // doesn't get properly set
     TEST.event(document.getElementById("parent"),"onmouseover");
-    //TEST.event(document.getElementById("child"),"onmouseover");
-    //TEST.event(document.getElementById("child"),"onmouseout");
-    TEST.event(document.getElementById("parent"),"onmouseout");
+    assertEquals("parentIn",behaviourTest.output);
 
+    TEST.event(document.getElementById("parent"),"onmouseout");
     assertEquals("parentInparentOut",behaviourTest.output);
 
 };

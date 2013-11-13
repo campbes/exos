@@ -214,26 +214,48 @@ var Exos = (function () {
             parent = target.parentNode,
             related = e.relatedTarget;
 
+        function qualify(obj,el) {
+            if(obj.id && obj.id !== el.id) {
+                return false;
+            }
+            if(obj.className && obj.className !== el.className) {
+                return false;
+            }
+            if(obj.tagName && obj.tagName !== el.tagName) {
+                return false;
+            }
+            if(obj.attribute) {
+                if(!el.hasAttribute(obj.attribute.key)) {
+                    return false;
+                }
+                if(obj.attribute.value && obj.attribute.value !== target.getAttribute(obj.attribute.key)) {
+                    return false;
+                }
+            }
+            if(obj.parent) {
+                return qualify(obj.parent,el.parentNode);
+            }
+            if(obj.ancestor) {
+                var ancestor = el.parentNode;
+                while(ancestor !== body) {
+                    if(qualify(obj.ancestor,ancestor)) {
+                        return true;
+                    }
+                    ancestor = ancestor.parentNode;
+                }
+                return false;
+            }
+            return true;
+        }
+
         function runBehaviour() {
             if (!behaviour) {
                 return false;
             }
-            if(behaviour.id && behaviour.id !== target.id) {
+
+            var qualified = qualify(behaviour,target);
+            if(!qualified) {
                 return false;
-            }
-            if(behaviour.className && behaviour.className !== target.className) {
-                return false;
-            }
-            if(behaviour.tagName && behaviour.tagName !== target.tagName) {
-                return false;
-            }
-            if(behaviour.attribute) {
-                if(!target.hasAttribute(behaviour.attribute.key)) {
-                    return false;
-                }
-                if(behaviour.attribute.value && behaviour.attribute.value !== target.getAttribute(behaviour.attribute.key)) {
-                    return false;
-                }
             }
 
             // when moving from node to child node, want to ensure mouseover/out
