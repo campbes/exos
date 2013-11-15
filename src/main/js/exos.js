@@ -172,6 +172,12 @@ var Exos = (function () {
         if (!bhvr) {
             return null;
         }
+
+        // TODO: temp hack, assuming all behvaiour configs are arrays now
+        bhvr = bhvr[0];
+        if (!bhvr) {
+            return null;
+        }
         if (typeof bhvr.fn !== "function") {
             return null;
         }
@@ -352,6 +358,11 @@ var Exos = (function () {
     }
 
     function add(bhvrs) {
+        if (objects.isArray(bhvrs)) {
+            bhvrs = interpret(bhvrs);
+        }
+        bhvrs = tweakEventSupport(bhvrs);
+        bhvrs = convertBhvrFormat(bhvrs);
         behaviours = objects.merge(behaviours, bhvrs);
         if (isEnabled()) {
             setExplicit(bhvrs, false);
@@ -466,7 +477,41 @@ var Exos = (function () {
         return bhvrs;
     }
 
+    function convertBhvrFormat(bhvrs) {
+
+        var i = 0,
+            j = 0,
+            k = 0,
+            selType = null,
+            ident = null;
+
+        for(i in bhvrs) {
+            if(bhvrs.hasOwnProperty(i)) {
+                selType = bhvrs[i];
+                for(j in selType) {
+                    if(selType.hasOwnProperty(j)) {
+                        ident = selType[j];
+                        for(k in ident) {
+                            if(ident.hasOwnProperty(k)) {
+                                if(!objects.isArray(ident[k])) {
+                                    ident[k] = [ident[k]];
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return bhvrs;
+    }
+
     function enable(bhvrs) {
+
+        if (enabled && bhvrs) {
+            add(bhvrs);
+            return true;
+        }
 
         if (objects.isArray(bhvrs)) {
             bhvrs = interpret(bhvrs);
@@ -476,10 +521,9 @@ var Exos = (function () {
         // and set the "related" flag
         bhvrs = tweakEventSupport(bhvrs);
 
-        if (enabled && bhvrs) {
-            add(bhvrs);
-            return true;
-        }
+        // convert old style single behaviours into behaviour arrays - maintain backwards compatibility
+        bhvrs = convertBhvrFormat(bhvrs);
+
         var win = window;
         behaviours = bhvrs || {};
         if (body) {

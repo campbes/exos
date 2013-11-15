@@ -86,18 +86,18 @@ behaviourTest.prototype.testEnablewithBhvrs = function() {
     assertObject(obj.id);
     assertObject(obj.id.test);
     assertObject(obj.id.test.click);
-    assertFunction(obj.id.test.click.fn);
+    assertFunction(obj.id.test.click[0].fn);
     assertObject(obj.id.test2);
     assertObject(obj.id.test2.mouseover);
-    assertFunction(obj.id.test2.mouseover.fn);
+    assertFunction(obj.id.test2.mouseover[0].fn);
     assertObject(obj.className);
     assertObject(obj.className.link);
     assertObject(obj.className.link.keypress);
-    assertFunction(obj.className.link.keypress.fn);
+    assertFunction(obj.className.link.keypress[0].fn);
     assertObject(obj.tagName);
     assertObject(obj.tagName.div);
     assertObject(obj.tagName.div.mouseout);
-    assertFunction(obj.tagName.div.mouseout.fn);
+    assertFunction(obj.tagName.div.mouseout[0].fn);
 };
 
 behaviourTest.prototype.testBehaviour = function() {
@@ -161,7 +161,7 @@ behaviourTest.prototype.testBreakChain = function() {
     /*:DOC += <div id="chaintest" class="chaintest"></div>*/
     behaviourTest.output = "";
     var bhvrs = behaviourTest.bhvrs;
-    bhvrs.id.chaintest.click.bc = true;
+    bhvrs.id.chaintest.click[0].bc = true;
     Exos.disable(true);
     Exos.enable(bhvrs);
     TEST.event(document.getElementById("chaintest"),"onclick");
@@ -172,8 +172,8 @@ behaviourTest.prototype.testBreakChainMid = function() {
     /*:DOC += <div id="chaintest" class="chaintest"></div>*/
     behaviourTest.output = "";
     var bhvrs = behaviourTest.bhvrs;
-    bhvrs.id.chaintest.click.bc = false;
-    bhvrs.className.chaintest.click.bc = true;
+    bhvrs.id.chaintest.click[0].bc = false;
+    bhvrs.className.chaintest.click[0].bc = true;
     Exos.disable(true);
     Exos.enable(bhvrs);
     TEST.event(document.getElementById("chaintest"),"onclick");
@@ -185,7 +185,7 @@ behaviourTest.prototype.testBreakChainEnd = function() {
     behaviourTest.output = "";
     var bhvrs = behaviourTest.bhvrs;
     bhvrs.id.chaintest.click.bc = false;
-    bhvrs.className.chaintest.click.bc = false;
+    bhvrs.className.chaintest.click[0].bc = false;
     bhvrs.tagName.DIV.click.bc = true;
     Exos.disable(true);
     Exos.enable(bhvrs);
@@ -489,8 +489,8 @@ behaviourTest.prototype.testBubbleOnClass = function() {
     // older IE versions seem to have some timing issues when we keep cramming stuff in and re-enabling then
     // firing the event immediately.
 
-        TEST.event(document.getElementById("test"),"onclick");
-        assertEquals("idclass",behaviourTest.output);
+    TEST.event(document.getElementById("test"),"onclick");
+    assertEquals("idclass",behaviourTest.output);
 
 };
 
@@ -525,8 +525,8 @@ behaviourTest.prototype.testBubbleOnId = function() {
     // older IE versions seem to have some timing issues when we keep cramming stuff in and re-enabling then
     // firing the event immediately.
 
-        TEST.event(document.getElementById("testOnId"),"onclick");
-        assertEquals("idclass",behaviourTest.output);
+    TEST.event(document.getElementById("testOnId"),"onclick");
+    assertEquals("idclass",behaviourTest.output);
 
 };
 
