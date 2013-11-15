@@ -491,11 +491,12 @@ var Exos = (function () {
         }
 
         function modify(bhvr,type,replaceType) {
+            var k = -1;
             if(!bhvr[type]) {
                 return;
             }
-            for(var i=bhvr[type].length-1; i>=0; i--) {
-                bhvr[type][i].rel = true;
+            for(k=bhvr[type].length-1; k>=0; k--) {
+                bhvr[type][k].rel = true;
 
             }
             bhvr[replaceType] = bhvr[replaceType] || [];
