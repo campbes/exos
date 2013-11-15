@@ -205,14 +205,18 @@ var Exos = (function () {
         target = target || e.target || e.srcElement;
 
         var type = e.type,
+            bhvrArray = null,
+            bhvrArrayLength = -1,
             behaviour = null,
             bubble = null,
             breakchain = null,
             classes = "",
             classes_length = 0,
             i = -1,
+            x = -1,
             parent = target.parentNode,
-            related = e.relatedTarget;
+            related = e.relatedTarget,
+            phase = null;
 
         function qualify(obj,el) {
             if(obj.id && obj.id !== el.id) {
@@ -248,7 +252,7 @@ var Exos = (function () {
             return true;
         }
 
-        function runBehaviour() {
+        function runBehaviour(type) {
             if (!behaviour) {
                 return false;
             }
@@ -275,19 +279,31 @@ var Exos = (function () {
             // a behaviour explicitly sets it to true, or implicitly sets it to false
             // once its been set by a behaviour, it cannot be overridden by a subsequent behaviour in the same chain -
             // because behaviours are executed in order of specificity - id > class > tag
+            // if there are multiple behaviours of the same type (eg id), then bubble can be overridden (where true
+            // will always win)
             if (bubble === null) {
                 bubble = behaviour.bb || false;
             }
+            if(behaviour.bb && type === phase) {
+                bubble = behaviour.bb;
+            }
             // breakchain only needs setting if true
             breakchain = behaviour.bc;
+
+            // set the phase as the last action of running a behaviour
+            phase = type;
 
             return true;
         }
 
         // if its got an id, use it. Good chance this handler will kill the event so only carry on if it doesn't
         if (target.id) {
-            behaviour = get(type, target.id, "id");
-            runBehaviour();
+            bhvrArray = [].concat(get(type, target.id, "id"));
+            bhvrArrayLength = bhvrArray.length;
+            for(x =0; x<bhvrArrayLength; x++) {
+                behaviour = bhvrArray[x];
+                runBehaviour("id");
+            }
         }
 
         if (!breakchain && target.className) {
@@ -297,13 +313,21 @@ var Exos = (function () {
                 if (breakchain) {
                     break;
                 }
-                behaviour = get(type, classes[i], "className");
-                runBehaviour();
+                bhvrArray = [].concat(get(type, classes[i], "className"));
+                bhvrArrayLength = bhvrArray.length;
+                for(x =0; x<bhvrArrayLength; x++) {
+                    behaviour = bhvrArray[x];
+                    runBehaviour("className");
+                }
             }
         }
         if (!breakchain) {
-            behaviour = get(type, target.tagName, "tagName", target);
-            runBehaviour();
+            bhvrArray = [].concat(get(type, target.tagName, "tagName", target));
+            bhvrArrayLength = bhvrArray.length;
+            for(x =0; x<bhvrArrayLength; x++) {
+                behaviour = bhvrArray[x];
+                runBehaviour("tagName");
+            }
         }
 
         // bubble up unless the bubble has been set to false by a behaviour
@@ -373,14 +397,6 @@ var Exos = (function () {
         return enabled;
     }
 
-    function add(bhvrs) {
-        behaviours = objects.merge(behaviours, bhvrs);
-        if (isEnabled()) {
-            setExplicit(bhvrs, false);
-        }
-        reportBehaviours();
-    }
-
     function interpret(cfg) {
 
         var bhvrs = {};
@@ -389,8 +405,10 @@ var Exos = (function () {
             j = null,
             n = null,
             x = null,
+            y = null,
             cfgItem = null,
             bhvrsItem = null,
+            bhvrArray = null,
             bhvr = null,
             interpreted = null,
             selObj = null,
@@ -419,31 +437,44 @@ var Exos = (function () {
                         if(!bhvrs[primarySel][selObj[primarySel]]) {
                             bhvrs[primarySel][selObj[primarySel]] = {};
                         }
+
                         bhvrsItem = bhvrs[primarySel][selObj[primarySel]];
+
                         for (x = eventTypes.length - 1; x >= 0; x--) {
                             evtType = eventTypes[x];
-                            bhvr = cfgItem[j][evtType];
-                            if (typeof bhvr === "function") {
-                                bhvrsItem[evtType] = {
-                                    fn: bhvr
-                                };
-                            } else if (bhvr) {
-                                bhvrsItem[evtType] = bhvr;
+                            bhvrArray = cfgItem[j][evtType];
+
+                            if(!objects.isArray(bhvrArray)) {
+                                bhvrArray = [bhvrArray];
                             }
-                            if(bhvrsItem[evtType]) {
-                                if(primarySel !== "className" && selObj.className) {
-                                    bhvrsItem[evtType].className = selObj.className;
+
+                            for(y = 0; y<bhvrArray.length; y++) {
+                                bhvr = bhvrArray[y];
+
+                                if (typeof bhvr === "function") {
+                                    bhvr = {
+                                        fn : bhvr
+                                    };
                                 }
-                                if(primarySel !== "tagName" && selObj.tagName) {
-                                    bhvrsItem[evtType].tagName = selObj.tagName;
-                                }
-                                if(selObj.attribute) {
-                                    bhvrsItem[evtType].attribute = selObj.attribute;
-                                }
-                                if(selObj.parent) {
-                                    bhvrsItem[evtType].parent = selObj.parent;
-                                } else if(selObj.ancestor) {
-                                    bhvrsItem[evtType].ancestor = selObj.ancestor;
+                                if (bhvr) {
+                                    if(!bhvrsItem[evtType]) {
+                                        bhvrsItem[evtType] = [];
+                                    }
+                                    if(primarySel !== "className" && selObj.className) {
+                                        bhvr.className = selObj.className;
+                                    }
+                                    if(primarySel !== "tagName" && selObj.tagName) {
+                                        bhvr.tagName = selObj.tagName;
+                                    }
+                                    if(selObj.attribute) {
+                                        bhvr.attribute = selObj.attribute;
+                                    }
+                                    if(selObj.parent) {
+                                        bhvr.parent = selObj.parent;
+                                    } else if(selObj.ancestor) {
+                                        bhvr.ancestor = selObj.ancestor;
+                                    }
+                                    bhvrsItem[evtType].push(bhvr);
                                 }
                             }
                         }
@@ -488,7 +519,54 @@ var Exos = (function () {
         return bhvrs;
     }
 
+    function convertBhvrFormat(bhvrs) {
+
+        var i = 0,
+            j = 0,
+            k = 0,
+            selType = null,
+            ident = null;
+
+        for(i in bhvrs) {
+            if(bhvrs.hasOwnProperty(i)) {
+                selType = bhvrs[i];
+                for(j in selType) {
+                    if(selType.hasOwnProperty(j)) {
+                        ident = selType[j];
+                        for(k in ident) {
+                            if(ident.hasOwnProperty(k)) {
+                                if(!objects.isArray(ident[k])) {
+                                    ident[k] = [ident[k]];
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return bhvrs;
+    }
+
+    function add(bhvrs) {
+        if (objects.isArray(bhvrs)) {
+            bhvrs = interpret(bhvrs);
+        }
+        bhvrs = tweakEventSupport(bhvrs);
+        bhvrs = convertBhvrFormat(bhvrs);
+        behaviours = objects.merge(behaviours, bhvrs);
+        if (isEnabled()) {
+            setExplicit(bhvrs, false);
+        }
+        reportBehaviours();
+    }
+
     function enable(bhvrs) {
+
+        if (enabled && bhvrs) {
+            add(bhvrs);
+            return true;
+        }
 
         if (objects.isArray(bhvrs)) {
             bhvrs = interpret(bhvrs);
@@ -498,10 +576,9 @@ var Exos = (function () {
         // and set the "related" flag
         bhvrs = tweakEventSupport(bhvrs);
 
-        if (enabled && bhvrs) {
-            add(bhvrs);
-            return true;
-        }
+        // convert old style single behaviours into behaviour arrays - maintain backwards compatibility
+        bhvrs = convertBhvrFormat(bhvrs);
+
         var win = window;
         behaviours = bhvrs || {};
         if (body) {

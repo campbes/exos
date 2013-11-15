@@ -30,7 +30,7 @@ behaviourTest.prototype.testModule = function() {
 };
 
 behaviourTest.prototype.testEnable = function() {
-    Exos.disable();
+   Exos.disable(true);
     assertEquals(false,Exos.isEnabled());
     Exos.enable();
     assertEquals(true,Exos.isEnabled());
@@ -38,7 +38,7 @@ behaviourTest.prototype.testEnable = function() {
 
 behaviourTest.prototype.testDisable = function() {
     assertEquals(true,Exos.isEnabled());
-    Exos.disable();
+   Exos.disable(true);
     assertEquals(false,Exos.isEnabled());
 };
 
@@ -79,25 +79,25 @@ behaviourTest.prototype.testEnablewithBhvrs = function() {
             }
         }
     };
-    Exos.disable();
+   Exos.disable(true);
     assertEquals(Exos.enable(bhvrs),true);
     var obj = Exos.behaviours;
     assertObject(obj);
     assertObject(obj.id);
     assertObject(obj.id.test);
     assertObject(obj.id.test.click);
-    assertFunction(obj.id.test.click.fn);
+    assertFunction(obj.id.test.click[0].fn);
     assertObject(obj.id.test2);
     assertObject(obj.id.test2.mouseover);
-    assertFunction(obj.id.test2.mouseover.fn);
+    assertFunction(obj.id.test2.mouseover[0].fn);
     assertObject(obj.className);
     assertObject(obj.className.link);
     assertObject(obj.className.link.keypress);
-    assertFunction(obj.className.link.keypress.fn);
+    assertFunction(obj.className.link.keypress[0].fn);
     assertObject(obj.tagName);
     assertObject(obj.tagName.div);
     assertObject(obj.tagName.div.mouseout);
-    assertFunction(obj.tagName.div.mouseout.fn);
+    assertFunction(obj.tagName.div.mouseout[0].fn);
 };
 
 behaviourTest.prototype.testBehaviour = function() {
@@ -161,7 +161,7 @@ behaviourTest.prototype.testBreakChain = function() {
     /*:DOC += <div id="chaintest" class="chaintest"></div>*/
     behaviourTest.output = "";
     var bhvrs = behaviourTest.bhvrs;
-    bhvrs.id.chaintest.click.bc = true;
+    bhvrs.id.chaintest.click[0].bc = true;
     Exos.disable(true);
     Exos.enable(bhvrs);
     TEST.event(document.getElementById("chaintest"),"onclick");
@@ -172,8 +172,8 @@ behaviourTest.prototype.testBreakChainMid = function() {
     /*:DOC += <div id="chaintest" class="chaintest"></div>*/
     behaviourTest.output = "";
     var bhvrs = behaviourTest.bhvrs;
-    bhvrs.id.chaintest.click.bc = false;
-    bhvrs.className.chaintest.click.bc = true;
+    bhvrs.id.chaintest.click[0].bc = false;
+    bhvrs.className.chaintest.click[0].bc = true;
     Exos.disable(true);
     Exos.enable(bhvrs);
     TEST.event(document.getElementById("chaintest"),"onclick");
@@ -185,7 +185,7 @@ behaviourTest.prototype.testBreakChainEnd = function() {
     behaviourTest.output = "";
     var bhvrs = behaviourTest.bhvrs;
     bhvrs.id.chaintest.click.bc = false;
-    bhvrs.className.chaintest.click.bc = false;
+    bhvrs.className.chaintest.click[0].bc = false;
     bhvrs.tagName.DIV.click.bc = true;
     Exos.disable(true);
     Exos.enable(bhvrs);
@@ -489,8 +489,8 @@ behaviourTest.prototype.testBubbleOnClass = function() {
     // older IE versions seem to have some timing issues when we keep cramming stuff in and re-enabling then
     // firing the event immediately.
 
-        TEST.event(document.getElementById("test"),"onclick");
-        assertEquals("idclass",behaviourTest.output);
+    TEST.event(document.getElementById("test"),"onclick");
+    assertEquals("idclass",behaviourTest.output);
 
 };
 
@@ -525,8 +525,8 @@ behaviourTest.prototype.testBubbleOnId = function() {
     // older IE versions seem to have some timing issues when we keep cramming stuff in and re-enabling then
     // firing the event immediately.
 
-        TEST.event(document.getElementById("testOnId"),"onclick");
-        assertEquals("idclass",behaviourTest.output);
+    TEST.event(document.getElementById("testOnId"),"onclick");
+    assertEquals("idclass",behaviourTest.output);
 
 };
 
@@ -567,13 +567,13 @@ behaviourTest.prototype.testselectorFormat = function() {
             }
         }
     };
-    Exos.disable();
+   Exos.disable(true);
     Exos.enable(bhvrs);
     var traditional = Exos.behaviours;
-    Exos.disable();
+   Exos.disable(true);
     Exos.enable(cfgArray);
     var interpreted = Exos.behaviours;
-    Exos.disable();
+   Exos.disable(true);
     assertEquals(traditional,interpreted);
 };
 
@@ -598,7 +598,7 @@ behaviourTest.prototype.testQualifiers = function() {
         behaviourTest.output = "tested";
     }}}];
 
-    Exos.disable();
+   Exos.disable(true);
     Exos.enable(bhvrs);
     behaviourTest.output = "";
     TEST.event(document.getElementById("testFalse"),"onclick");
@@ -606,7 +606,7 @@ behaviourTest.prototype.testQualifiers = function() {
     TEST.event(document.getElementById("testTrue"),"onclick");
     assertEquals("tested",behaviourTest.output);
 
-    Exos.disable();
+   Exos.disable(true);
     Exos.enable(cfg);
     behaviourTest.output = "";
     TEST.event(document.getElementById("testFalse"),"onclick");
@@ -621,7 +621,7 @@ behaviourTest.prototype.testMultipleSelectors = function() {
     var cfg = [{'DIV, h1': {'click' : function() {
         behaviourTest.output += "tested";
     }}}];
-    Exos.disable();
+   Exos.disable(true);
     Exos.enable(cfg);
 
     behaviourTest.output = "";
@@ -641,7 +641,7 @@ behaviourTest.prototype.testComplexQualifier = function() {
         behaviourTest.output += "tested";
     }}}];
 
-    Exos.disable();
+    Exos.disable(true);
     Exos.enable(cfg);
     behaviourTest.output = "";
     TEST.event(document.getElementById("paraOne"),"onclick");
@@ -657,10 +657,10 @@ behaviourTest.prototype.testTagQualifier = function() {
     /*:DOC += <div id="div" class="one"></div><p class="one" id="para"></p>*/
 
     var cfg = [{'div.one': {'click' : function() {
-        behaviourTest.output = "tested";
+        behaviourTest.output += "tested";
     }}}];
 
-    Exos.disable();
+   Exos.disable(true);
     Exos.enable(cfg);
     behaviourTest.output = "";
     TEST.event(document.getElementById("div"),"onclick");
@@ -677,7 +677,7 @@ behaviourTest.prototype.testAttributeName = function() {
         behaviourTest.output += "tested";
     }}}];
 
-    Exos.disable();
+   Exos.disable(true);
     Exos.enable(cfg);
     behaviourTest.output = "";
     TEST.event(document.getElementById("div"),"onclick");
@@ -693,7 +693,7 @@ behaviourTest.prototype.testAttributeValue = function() {
         behaviourTest.output += "tested";
     }}}];
 
-    Exos.disable();
+   Exos.disable(true);
     Exos.enable(cfg);
     behaviourTest.output = "";
     TEST.event(document.getElementById("div"),"onclick");
@@ -715,16 +715,96 @@ behaviourTest.prototype.testRelationalEvents = function() {
         }}}
     ];
 
-    Exos.disable();
+   Exos.disable(true);
     Exos.enable(cfg);
-
+    behaviourTest.output = "";
 
     // hard to simulate moueover from one element to another, think relatedTarget
     // doesn't get properly set
     TEST.event(document.getElementById("parent"),"onmouseover");
-    assertEquals("parentIn",behaviourTest.output);
-
+    //TEST.event(document.getElementById("child"),"onmouseover");
+    //TEST.event(document.getElementById("child"),"onmouseout");
     TEST.event(document.getElementById("parent"),"onmouseout");
+
     assertEquals("parentInparentOut",behaviourTest.output);
 
+};
+
+behaviourTest.prototype.testMultipleHandlers = function() {
+    /*:DOC += <div id="mutli"></div> */
+
+    var cfg = [
+        {'#mutli': {'click' : function() {
+            behaviourTest.output += "one";
+        }}},
+        {'#mutli': {'click' : function() {
+            behaviourTest.output += "two";
+        }}}
+    ];
+
+    Exos.disable(true);
+    Exos.enable(cfg);
+    behaviourTest.output = "";
+    TEST.event(document.getElementById("mutli"),"click");
+    assertEquals("onetwo",behaviourTest.output);
+
+};
+
+behaviourTest.prototype.testMultipleHandlersAsArray = function() {
+    /*:DOC += <div id="mutli2"></div> */
+
+    // note both formats used - one with a config object with fn, one just a straight function
+    var cfg = [
+        {'#mutli2': {'click' : [
+            {
+                fn:function() {
+                    behaviourTest.output += "one";
+                }
+            },function() {
+                behaviourTest.output += "two";
+            }
+        ]}}
+    ];
+
+    Exos.disable(true);
+    Exos.enable(cfg);
+    behaviourTest.output = "";
+    TEST.event(document.getElementById("mutli2"),"click");
+    assertEquals("onetwo",behaviourTest.output);
+
+};
+
+behaviourTest.prototype.testBubbleWhenConflicting = function() {
+    /*:DOC += <div id="parent" ><div id="child"></div></div>*/
+    behaviourTest.output = "";
+    var bhvrs = {
+        id : {
+            "parent" : {
+                click : {
+                    fn : function() {
+                        behaviourTest.output += "parent";
+                    }
+                }
+            },
+            "child" : {
+                click : [
+                    {
+                        fn : function() {
+                            behaviourTest.output += "bubble";
+                        }
+                    },{
+                        fn : function() {
+                            behaviourTest.output += "nobubble";
+                        },
+                        bb : true
+                    }
+                ]
+            }
+        }
+    };
+    Exos.disable(true);
+    Exos.enable(bhvrs);
+    behaviourTest.output = "";
+    TEST.event(document.getElementById("child"),"onclick");
+    assertEquals("bubblenobubbleparent",behaviourTest.output);
 };
