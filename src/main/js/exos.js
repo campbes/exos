@@ -172,9 +172,6 @@ var Exos = (function () {
         if (!bhvr) {
             return null;
         }
-        if (typeof bhvr.fn !== "function") {
-            return null;
-        }
         return bhvr;
     }
 
@@ -497,8 +494,11 @@ var Exos = (function () {
             if(!bhvr[type]) {
                 return;
             }
-            bhvr[type].rel = true;
-            bhvr[replaceType] = bhvr[replaceType] || {};
+            for(var i=bhvr[type].length-1; i>=0; i--) {
+                bhvr[type][i].rel = true;
+
+            }
+            bhvr[replaceType] = bhvr[replaceType] || [];
             bhvr[replaceType] = objects.merge(bhvr[replaceType],bhvr[type]);
             delete bhvr[type];
         }
