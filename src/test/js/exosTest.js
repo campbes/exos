@@ -223,20 +223,20 @@ behaviourTest.prototype.testBreakChainMultiClass = function() {
 
 behaviourTest.prototype.testNoBubble = function() {
     /*:DOC += <div id="parent" ><div id="child"></div></div>*/
-    behaviourTest.output = "";
+
     var bhvrs = {
         id : {
             "parent" : {
                 click : {
                     fn : function() {
-                        behaviourTest.output += " parent";
+                        behaviourTest.output2 += " parent";
                     }
                 }
             },
             "child" : {
                 click : {
                     fn : function() {
-                        behaviourTest.output += "child";
+                        behaviourTest.output2 += "child";
                     }
                 }
             }
@@ -244,26 +244,27 @@ behaviourTest.prototype.testNoBubble = function() {
     };
     Exos.disable(true);
     Exos.enable(bhvrs);
+    behaviourTest.output2 = "";
     TEST.event(document.getElementById("child"),"onclick");
-    assertEquals("child",behaviourTest.output);
+    assertEquals("child",behaviourTest.output2);
 };
 
 behaviourTest.prototype.testBubble = function() {
     /*:DOC += <div id="parent" ><div id="child"></div></div>*/
-    behaviourTest.output = "";
+    behaviourTest.output3 = "";
     var bhvrs = {
         id : {
             "parent" : {
                 click : {
                     fn : function() {
-                        behaviourTest.output += " parent";
+                        behaviourTest.output3 += " parent";
                     }
                 }
             },
             "child" : {
                 click : {
                     fn : function() {
-                        behaviourTest.output += "child";
+                        behaviourTest.output3 += "child";
                     },
                     bb : true
                 }
@@ -273,25 +274,25 @@ behaviourTest.prototype.testBubble = function() {
     Exos.disable(true);
     Exos.enable(bhvrs);
     TEST.event(document.getElementById("child"),"onclick");
-    assertEquals("child parent",behaviourTest.output);
+    assertEquals("child parent",behaviourTest.output3);
 };
 
 behaviourTest.prototype.testMultiBubble = function() {
     /*:DOC += <div id="parent" class="parent"><div id="child" class="child"></div></div>*/
-    behaviourTest.output = "";
+    behaviourTest.output4 = "";
     var bhvrs = {
         id : {
             "parent" : {
                 click : {
                     fn : function() {
-                        behaviourTest.output += " parent";
+                        behaviourTest.output4 += " parent";
                     }
                 }
             },
             "child" : {
                 click : {
                     fn : function() {
-                        behaviourTest.output += "child";
+                        behaviourTest.output4 += "child";
                     },
                     bb : true
                 }
@@ -301,14 +302,14 @@ behaviourTest.prototype.testMultiBubble = function() {
             "parent" : {
                 click : {
                     fn : function() {
-                        behaviourTest.output += " parentclass";
+                        behaviourTest.output4 += " parentclass";
                     }
                 }
             },
             "child" : {
                 click : {
                     fn : function() {
-                        behaviourTest.output += " childclass";
+                        behaviourTest.output4 += " childclass";
                     }
                 }
             }
@@ -317,7 +318,7 @@ behaviourTest.prototype.testMultiBubble = function() {
     Exos.disable(true);
     Exos.enable(bhvrs);
     TEST.event(document.getElementById("child"),"onclick");
-    assertEquals("child childclass parent parentclass",behaviourTest.output);
+    assertEquals("child childclass parent parentclass",behaviourTest.output4);
 };
 
 behaviourTest.prototype.testMissingHandlers = function() {
@@ -776,13 +777,13 @@ behaviourTest.prototype.testMultipleHandlersAsArray = function() {
 
 behaviourTest.prototype.testBubbleWhenConflicting = function() {
     /*:DOC += <div id="parent" ><div id="child"></div></div>*/
-    behaviourTest.output = "";
+
     var bhvrs = {
         id : {
             "parent" : {
                 click : {
                     fn : function() {
-                        behaviourTest.output += "parent";
+                        behaviourTest.output5 += "parent";
                     }
                 }
             },
@@ -790,11 +791,11 @@ behaviourTest.prototype.testBubbleWhenConflicting = function() {
                 click : [
                     {
                         fn : function() {
-                            behaviourTest.output += "bubble";
+                            behaviourTest.output5 += "bubble";
                         }
                     },{
                         fn : function() {
-                            behaviourTest.output += "nobubble";
+                            behaviourTest.output5 += "nobubble";
                         },
                         bb : true
                     }
@@ -804,7 +805,7 @@ behaviourTest.prototype.testBubbleWhenConflicting = function() {
     };
     Exos.disable(true);
     Exos.enable(bhvrs);
-    behaviourTest.output = "";
+    behaviourTest.output5 = "";
     TEST.event(document.getElementById("child"),"onclick");
-    assertEquals("bubblenobubbleparent",behaviourTest.output);
+    assertEquals("bubblenobubbleparent",behaviourTest.output5);
 };
