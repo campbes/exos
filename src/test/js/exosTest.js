@@ -771,3 +771,38 @@ behaviourTest.prototype.testMultipleHandlersAsArray = function() {
     assertEquals("onetwo",behaviourTest.output);
 
 };
+
+behaviourTest.prototype.testBubbleWhenConflicting = function() {
+    /*:DOC += <div id="parent" ><div id="child"></div></div>*/
+    behaviourTest.output = "";
+    var bhvrs = {
+        id : {
+            "parent" : {
+                click : {
+                    fn : function() {
+                        behaviourTest.output += "parent";
+                    }
+                }
+            },
+            "child" : {
+                click : [
+                    {
+                        fn : function() {
+                            behaviourTest.output += "bubble";
+                        }
+                    },{
+                        fn : function() {
+                            behaviourTest.output += "nobubble";
+                        },
+                        bb : true
+                    }
+                ]
+            }
+        }
+    };
+    Exos.disable(true);
+    Exos.enable(bhvrs);
+    behaviourTest.output = "";
+    TEST.event(document.getElementById("child"),"onclick");
+    assertEquals("bubblenobubbleparent",behaviourTest.output);
+};
