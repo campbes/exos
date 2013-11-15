@@ -172,15 +172,6 @@ var Exos = (function () {
         if (!bhvr) {
             return null;
         }
-
-        // TODO: temp hack, assuming all behvaiour configs are arrays now
-        bhvr = bhvr[0];
-        if (!bhvr) {
-            return null;
-        }
-        if (typeof bhvr.fn !== "function") {
-            return null;
-        }
         return bhvr;
     }
 
@@ -211,35 +202,60 @@ var Exos = (function () {
         target = target || e.target || e.srcElement;
 
         var type = e.type,
+            bhvrArray = null,
+            bhvrArrayLength = -1,
             behaviour = null,
             bubble = null,
             breakchain = null,
             classes = "",
             classes_length = 0,
             i = -1,
+            x = -1,
             parent = target.parentNode,
             related = e.relatedTarget;
+
+        function qualify(obj,el) {
+            if(obj.id && obj.id !== el.id) {
+                return false;
+            }
+            if(obj.className && obj.className !== el.className) {
+                return false;
+            }
+            if(obj.tagName && obj.tagName !== el.tagName) {
+                return false;
+            }
+            if(obj.attribute) {
+                if(!el.hasAttribute(obj.attribute.key)) {
+                    return false;
+                }
+                if(obj.attribute.value && obj.attribute.value !== target.getAttribute(obj.attribute.key)) {
+                    return false;
+                }
+            }
+            if(obj.parent) {
+                return qualify(obj.parent,el.parentNode);
+            }
+            if(obj.ancestor) {
+                var ancestor = el.parentNode;
+                while(ancestor !== body) {
+                    if(qualify(obj.ancestor,ancestor)) {
+                        return true;
+                    }
+                    ancestor = ancestor.parentNode;
+                }
+                return false;
+            }
+            return true;
+        }
 
         function runBehaviour() {
             if (!behaviour) {
                 return false;
             }
-            if(behaviour.id && behaviour.id !== target.id) {
+
+            var qualified = qualify(behaviour,target);
+            if(!qualified) {
                 return false;
-            }
-            if(behaviour.className && behaviour.className !== target.className) {
-                return false;
-            }
-            if(behaviour.tagName && behaviour.tagName !== target.tagName) {
-                return false;
-            }
-            if(behaviour.attribute) {
-                if(!target.hasAttribute(behaviour.attribute.key)) {
-                    return false;
-                }
-                if(behaviour.attribute.value && behaviour.attribute.value !== target.getAttribute(behaviour.attribute.key)) {
-                    return false;
-                }
             }
 
             // when moving from node to child node, want to ensure mouseover/out
@@ -270,8 +286,12 @@ var Exos = (function () {
 
         // if its got an id, use it. Good chance this handler will kill the event so only carry on if it doesn't
         if (target.id) {
-            behaviour = get(type, target.id, "id");
-            runBehaviour();
+            bhvrArray = [].concat(get(type, target.id, "id"));
+            bhvrArrayLength = bhvrArray.length;
+            for(x =0; x<bhvrArrayLength; x++) {
+                behaviour = bhvrArray[x];
+                runBehaviour();
+            }
         }
 
         if (!breakchain && target.className) {
@@ -281,13 +301,21 @@ var Exos = (function () {
                 if (breakchain) {
                     break;
                 }
-                behaviour = get(type, classes[i], "className");
-                runBehaviour();
+                bhvrArray = [].concat(get(type, classes[i], "className"));
+                bhvrArrayLength = bhvrArray.length;
+                for(x =0; x<bhvrArrayLength; x++) {
+                    behaviour = bhvrArray[x];
+                    runBehaviour();
+                }
             }
         }
         if (!breakchain) {
-            behaviour = get(type, target.tagName, "tagName", target);
-            runBehaviour();
+            bhvrArray = [].concat(get(type, target.tagName, "tagName", target));
+            bhvrArrayLength = bhvrArray.length;
+            for(x =0; x<bhvrArrayLength; x++) {
+                behaviour = bhvrArray[x];
+                runBehaviour();
+            }
         }
 
         // bubble up unless the bubble has been set to false by a behaviour
@@ -378,6 +406,7 @@ var Exos = (function () {
             j = null,
             n = null,
             x = null,
+            y = null,
             cfgItem = null,
             bhvrsItem = null,
             bhvr = null,
@@ -408,31 +437,44 @@ var Exos = (function () {
                         if(!bhvrs[primarySel][selObj[primarySel]]) {
                             bhvrs[primarySel][selObj[primarySel]] = {};
                         }
+
                         bhvrsItem = bhvrs[primarySel][selObj[primarySel]];
+
                         for (x = eventTypes.length - 1; x >= 0; x--) {
                             evtType = eventTypes[x];
                             bhvr = cfgItem[j][evtType];
-                            if (typeof bhvr === "function") {
-                                bhvrsItem[evtType] = {
-                                    fn: bhvr
-                                };
-                            } else if (bhvr) {
-                                bhvrsItem[evtType] = bhvr;
+
+                            if(!objects.isArray(bhvr)) {
+                                bhvr = [bhvr];
                             }
-                            if(bhvrsItem[evtType]) {
-                                if(primarySel !== "className" && selObj.className) {
-                                    bhvrsItem[evtType].className = selObj.className;
+
+                            for(y = 0; y<bhvr.length; y++) {
+                                var b = bhvr[y];
+
+                                if (typeof b === "function") {
+                                    b = {
+                                        fn : b
+                                    };
                                 }
-                                if(primarySel !== "tagName" && selObj.tagName) {
-                                    bhvrsItem[evtType].tagName = selObj.tagName;
-                                }
-                                if(selObj.attribute) {
-                                    bhvrsItem[evtType].attribute = selObj.attribute;
-                                }
-                                if(selObj.parent) {
-                                    bhvrsItem[evtType].parent = selObj.parent;
-                                } else if(selObj.ancestor) {
-                                    bhvrsItem[evtType].ancestor = selObj.ancestor;
+                                if (b) {
+                                    if(!bhvrsItem[evtType]) {
+                                        bhvrsItem[evtType] = [];
+                                    }
+                                    if(primarySel !== "className" && selObj.className) {
+                                        b.className = selObj.className;
+                                    }
+                                    if(primarySel !== "tagName" && selObj.tagName) {
+                                        b.tagName = selObj.tagName;
+                                    }
+                                    if(selObj.attribute) {
+                                        b.attribute = selObj.attribute;
+                                    }
+                                    if(selObj.parent) {
+                                        b.parent = selObj.parent;
+                                    } else if(selObj.ancestor) {
+                                        b.ancestor = selObj.ancestor;
+                                    }
+                                    bhvrsItem[evtType].push(b);
                                 }
                             }
                         }
