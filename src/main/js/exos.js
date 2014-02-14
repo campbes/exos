@@ -8,7 +8,7 @@ var Exos = (function () {
 
     var enabled = false,
         eventTypes = ["click", "mousedown", "mouseup", "mouseover", "mouseout", "mouseenter", "mouseleave", "keypress", "keydown", "keyup"],
-        explicitEvents = ["focus", "blur", "change", "submit"],
+        explicitEvents = ["focus", "blur", "change", "submit","resize"],
         eventTypesLength = eventTypes.length,
         behaviours = null,
         body = document.body;
@@ -318,8 +318,9 @@ var Exos = (function () {
                 }
             }
         }
+
         if (!breakchain) {
-            bhvrArray = [].concat(get(type, target.tagName, "tagName", target));
+            bhvrArray = [].concat(get(type, (target === window ? "WINDOW" : target.tagName), "tagName", target));
             bhvrArrayLength = bhvrArray.length;
             for(x =0; x<bhvrArrayLength; x++) {
                 behaviour = bhvrArray[x];
@@ -336,10 +337,26 @@ var Exos = (function () {
     function setExplicit(bhvrs, rem) {
         // set the unique handlers that can't be handled by the behaviour layer
         var idbhvrs = bhvrs.id,
+            tagBhvrs = bhvrs.tagName,
             i = null,
+            x = 0,
+            els = null,
             el = null,
-            j = -1,
+            j = 0,
             evt = null;
+
+        function setHandler(obj,bhvr) {
+            for (x = explicitEvents.length - 1; x >= 0; x -= 1) {
+                evt = explicitEvents[x];
+                if (bhvr.hasOwnProperty(evt)) {
+                    if (rem) {
+                        events.removeAll(obj, evt);
+                    } else {
+                        events.add(obj, evt, handle);
+                    }
+                }
+            }
+        }
 
         for (i in idbhvrs) {
             if (idbhvrs.hasOwnProperty(i)) {
@@ -347,15 +364,21 @@ var Exos = (function () {
                 if (!el) {
                     continue;
                 }
-                for (j = explicitEvents.length - 1; j >= 0; j -= 1) {
-                    evt = explicitEvents[j];
-                    if (idbhvrs[i].hasOwnProperty(evt)) {
-                        if (rem) {
-                            events.removeAll(el, evt);
-                        } else {
-                            events.add(el, evt, handle);
-                        }
-                    }
+                setHandler(el,idbhvrs[i]);
+            }
+        }
+        for (i in tagBhvrs) {
+            if (tagBhvrs.hasOwnProperty(i)) {
+                if(i === "WINDOW") {
+                    setHandler(window,tagBhvrs[i]);
+                    continue;
+                }
+                els = document.getElementsByTagName(i);
+                if (!els) {
+                    continue;
+                }
+                for(j=0; j<els.length; j++){
+                    setHandler(els[j],tagBhvrs[i]);
                 }
             }
         }
@@ -395,7 +418,6 @@ var Exos = (function () {
     }
 
     function interpret(cfg) {
-
         var bhvrs = {};
         var cfgLength = cfg.length;
         var i = null,
@@ -410,7 +432,8 @@ var Exos = (function () {
             interpreted = null,
             selObj = null,
             primarySel = null,
-            evtType = null;
+            evtType = null,
+            allTypes = [].concat(eventTypes).concat(explicitEvents);
 
         for (i = 0; i <= cfgLength; i++) {
             cfgItem = cfg[i];
@@ -437,8 +460,8 @@ var Exos = (function () {
 
                         bhvrsItem = bhvrs[primarySel][selObj[primarySel]];
 
-                        for (x = eventTypes.length - 1; x >= 0; x--) {
-                            evtType = eventTypes[x];
+                        for (x = allTypes.length - 1; x >= 0; x--) {
+                            evtType = allTypes[x];
                             bhvrArray = cfgItem[j][evtType];
 
                             if(!objects.isArray(bhvrArray)) {
