@@ -809,3 +809,21 @@ behaviourTest.prototype.testBubbleWhenConflicting = function() {
     TEST.event(document.getElementById("child"),"onclick");
     assertEquals("bubblenobubbleparent",behaviourTest.output5);
 };
+
+behaviourTest.prototype.testRemove = function() {
+    /*:DOC += <div id="div"></div>*/
+
+    var cfg = [{'div': {'click' : function() {
+        behaviourTest.output += "test1";
+        }}},
+        {'div': {'click' : function() {
+            behaviourTest.output += "test2";
+        }}}];
+
+    Exos.disable(true);
+    Exos.enable(cfg);
+    Exos.remove([cfg[0]]);
+    behaviourTest.output = "";
+    TEST.event(document.getElementById("div"),"onclick");
+    assertEquals("test2",behaviourTest.output);
+};
