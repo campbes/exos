@@ -80,7 +80,7 @@ behaviourTest.prototype.testEnablewithBhvrs = function() {
         }
     };
    Exos.disable(true);
-    assertEquals(Exos.enable(bhvrs),true);
+    assertEquals(Exos.enable(bhvrs),bhvrs);
     var obj = Exos.behaviours;
     assertObject(obj);
     assertObject(obj.id);
@@ -415,7 +415,7 @@ behaviourTest.prototype.testRemoveAssignables = function() {
 behaviourTest.prototype.testAlreadyEnabled = function() {
     Exos.disable(true);
     Exos.enable();
-    assertTrue(Exos.enable());
+    assertObject(Exos.enable());
     assertTrue(Exos.isEnabled());
 };
 
@@ -531,7 +531,7 @@ behaviourTest.prototype.testBubbleOnId = function() {
 
 };
 
-behaviourTest.prototype.testselectorFormat = function() {
+behaviourTest.prototype.testSelectorFormat = function() {
 
     function myFunc() {
         return true;
@@ -575,7 +575,9 @@ behaviourTest.prototype.testselectorFormat = function() {
     Exos.enable(cfgArray);
     var interpreted = Exos.behaviours;
    Exos.disable(true);
-    assertEquals(traditional,interpreted);
+    var prop;
+    assertEquals(traditional.id.testOnId.click.fn,interpreted.id.testOnId.click.fn);
+    assertEquals(traditional.className.testOnId.click.bb,interpreted.className.testOnId.click.bb);
 };
 
 

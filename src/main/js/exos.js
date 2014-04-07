@@ -417,6 +417,36 @@ var Exos = (function () {
         return enabled;
     }
 
+    function Behaviour(obj,primarySel,selObj) {
+        var prop;
+        if(typeof obj === "function") {
+            obj.fn = obj;
+        }
+
+        for(prop in obj) {
+            if(obj.hasOwnProperty(prop)) {
+                this[prop] = obj[prop];
+            }
+        }
+
+        if(primarySel !== "className" && selObj.className) {
+            this.className = selObj.className;
+        }
+        if(primarySel !== "tagName" && selObj.tagName) {
+            this.tagName = selObj.tagName;
+        }
+        if(selObj.attribute) {
+            this.attribute = selObj.attribute;
+        }
+        if(selObj.parent) {
+            this.parent = selObj.parent;
+        } else if(selObj.ancestor) {
+            this.ancestor = selObj.ancestor;
+        }
+        this.ident = selObj.ident;
+        return this;
+    }
+
     function interpret(cfg) {
         var bhvrs = {};
         var cfgLength = cfg.length;
@@ -440,6 +470,7 @@ var Exos = (function () {
             for (j in cfgItem) {
                 if (cfgItem.hasOwnProperty(j)) {
                     interpreted = Exos.interpreter.interpret(j);
+
                     for(n=interpreted.length-1; n>=0; n--){
                         bhvrsItem = null;
                         selObj = interpreted[n];
@@ -464,39 +495,20 @@ var Exos = (function () {
                             evtType = allTypes[x];
                             bhvrArray = cfgItem[j][evtType];
 
+                            if(!bhvrArray) {
+                                continue;
+                            }
+
                             if(!objects.isArray(bhvrArray)) {
                                 bhvrArray = [bhvrArray];
                             }
 
                             for(y = 0; y<bhvrArray.length; y++) {
-                                bhvr = bhvrArray[y];
-
-                                if (typeof bhvr === "function") {
-                                    bhvr = {
-                                        fn : bhvr
-                                    };
+                                bhvr = new Behaviour(bhvrArray[y],primarySel,selObj);
+                                if(!bhvrsItem[evtType]) {
+                                    bhvrsItem[evtType] = [];
                                 }
-                                if (bhvr) {
-                                    if(!bhvrsItem[evtType]) {
-                                        bhvrsItem[evtType] = [];
-                                    }
-                                    if(primarySel !== "className" && selObj.className) {
-                                        bhvr.className = selObj.className;
-                                    }
-                                    if(primarySel !== "tagName" && selObj.tagName) {
-                                        bhvr.tagName = selObj.tagName;
-                                    }
-                                    if(selObj.attribute) {
-                                        bhvr.attribute = selObj.attribute;
-                                    }
-                                    if(selObj.parent) {
-                                        bhvr.parent = selObj.parent;
-                                    } else if(selObj.ancestor) {
-                                        bhvr.ancestor = selObj.ancestor;
-                                    }
-                                    bhvr.ident = selObj.ident;
-                                    bhvrsItem[evtType].push(bhvr);
-                                }
+                                bhvrsItem[evtType].push(bhvr);
                             }
                         }
                     }
