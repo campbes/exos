@@ -573,26 +573,7 @@ var Exos = (function () {
         return bhvrs;
     }
 
-    function add(bhvrs) {
-        if (objects.isArray(bhvrs)) {
-            bhvrs = interpret(bhvrs);
-        }
-        bhvrs = tweakEventSupport(bhvrs);
-        bhvrs = convertBhvrFormat(bhvrs);
-        behaviours = objects.merge(behaviours, bhvrs);
-        if (isEnabled()) {
-            setExplicit(bhvrs, false);
-        }
-        reportBehaviours();
-        return bhvrs;
-    }
-
-    function enable(bhvrs) {
-
-        if (enabled && bhvrs) {
-            return add(bhvrs);
-        }
-
+    function prepBehaviours(bhvrs) {
         if (objects.isArray(bhvrs)) {
             bhvrs = interpret(bhvrs);
         }
@@ -603,6 +584,52 @@ var Exos = (function () {
 
         // convert old style single behaviours into behaviour arrays - maintain backwards compatibility
         bhvrs = convertBhvrFormat(bhvrs);
+        return bhvrs;
+    }
+
+    function add(bhvrs) {
+        bhvrs = prepBehaviours(bhvrs);
+        behaviours = objects.merge(behaviours, bhvrs);
+        if (isEnabled()) {
+            setExplicit(bhvrs, false);
+        }
+        reportBehaviours();
+        return bhvrs;
+    }
+
+    function remove(bhvrs) {
+        bhvrs = prepBehaviours(bhvrs);
+
+        function deleteBehaviours(cfg,obj) {
+            var bhvr, x,y;
+            for(bhvr in cfg) {
+                if(cfg.hasOwnProperty(bhvr) && obj.hasOwnProperty(bhvr)) {
+                    if(objects.isArray(cfg[bhvr])) {
+                        for(x=cfg[bhvr].length-1; x>=0; x--) {
+                            for(y=0; y<obj[bhvr].length; y++) {
+                                if(cfg[bhvr][x].fn === obj[bhvr][y].fn) {
+                                    obj[bhvr].splice(y,1);
+                                }
+                            }
+                        }
+                    } else {
+                        deleteBehaviours(cfg[bhvr],obj[bhvr]);
+                    }
+                }
+            }
+        }
+
+        deleteBehaviours(bhvrs,behaviours);
+
+    }
+
+    function enable(bhvrs) {
+
+        if (enabled && bhvrs) {
+            return add(bhvrs);
+        }
+
+        bhvrs = prepBehaviours(bhvrs);
 
         var win = window;
         behaviours = bhvrs || {};
@@ -617,13 +644,13 @@ var Exos = (function () {
         return behaviours;
     }
 
-
     return {
 
         isEnabled: isEnabled,
         enable: enable,
         disable: disable,
         add: add,
+        remove : remove,
         behaviours: null
 
     };
