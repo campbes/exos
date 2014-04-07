@@ -494,6 +494,7 @@ var Exos = (function () {
                                     } else if(selObj.ancestor) {
                                         bhvr.ancestor = selObj.ancestor;
                                     }
+                                    bhvr.ident = selObj.ident;
                                     bhvrsItem[evtType].push(bhvr);
                                 }
                             }
@@ -583,13 +584,13 @@ var Exos = (function () {
             setExplicit(bhvrs, false);
         }
         reportBehaviours();
+        return bhvrs;
     }
 
     function enable(bhvrs) {
 
         if (enabled && bhvrs) {
-            add(bhvrs);
-            return true;
+            return add(bhvrs);
         }
 
         if (objects.isArray(bhvrs)) {
@@ -613,7 +614,7 @@ var Exos = (function () {
         events.add(win, "unload", destroy);
         enabled = true;
         reportBehaviours();
-        return true;
+        return behaviours;
     }
 
 
