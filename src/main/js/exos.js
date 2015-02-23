@@ -303,7 +303,8 @@ var Exos = (function () {
             }
         }
 
-        if (!breakchain && target.className) {
+        // check typeof className as SVGs return an object!!!
+        if (!breakchain && target.className && typeof target.className === "string") {
             classes = target.className.split(" ");
             classes_length = classes.length;
             for (i = 0; i < classes_length; i += 1) {
@@ -389,7 +390,9 @@ var Exos = (function () {
         for (i = eventTypesLength; i >= 0; i--) {
             events.add(body, eventTypes[i], handle);
         }
-        setExplicit(behaviours, false);
+        events.add(window, "onload", function() {
+            setExplicit(behaviours, false);
+        });
     }
 
     function destroy() {
